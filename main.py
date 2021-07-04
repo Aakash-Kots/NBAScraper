@@ -2,14 +2,11 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import schedule
-import time
 
 
-
-class nbaDataGenerator():
+class NbaDataGenerator():
     def __init__(self, teamname):
         self.teamname = teamname
-
 
     def getPlayersStats(self):
         URL = 'https://www.basketball-reference.com/teams/' + str(self.teamname) + '/2021.html'
@@ -31,7 +28,6 @@ class nbaDataGenerator():
 
         print(pd.DataFrame(gsw_players).to_string())
 
-
     def getLastGame(self):
         # score_file = open('scores', 'a')
         URL = 'https://www.basketball-reference.com/teams/' + str(self.teamname) + '/2021.html'
@@ -52,19 +48,20 @@ class nbaDataGenerator():
             # score_file.write('In their last game, ' + self.teamname + ' beat ' + list_of_a[4][41:46] + ' ' + list_of_a[4][9:16] + '\n')
             print('The score was ' + list_of_a[4][9:16])
 
+
 onceOrContinuous = input('Would you like the program to run once or run continuously? Yes (1) or No (2) : ')
 team = input('Which team would you like details on? Please enter their 3 letter abbreviation: ')
 info = input('What info would you like: ALL THE PLAYERS AND THEIR STATS (1) or THE RESULT OF LAST GAME(2): ')
 
 if int(onceOrContinuous) == 1:
     if int(info) == 2:
-        Generator = nbaDataGenerator(team)
-        LastGameGenerator= Generator.getLastGame
+        Generator = NbaDataGenerator(team)
+        LastGameGenerator = Generator.getLastGame
         schedule.every(10).seconds.do(LastGameGenerator)
         while True:
             schedule.run_pending()
     elif int(info) == 1:
-        Generator = nbaDataGenerator(team)
+        Generator = NbaDataGenerator(team)
         PlayerStatsGenerator = Generator.getPlayersStats
         schedule.every(10).seconds.do(PlayerStatsGenerator)
         while True:
@@ -73,16 +70,13 @@ if int(onceOrContinuous) == 1:
         print('Wrong number. Please enter 1 or 2 ONLY')
 elif int(onceOrContinuous) == 2:
     if int(info) == 1:
-        Generator = nbaDataGenerator(str(team))
+        Generator = NbaDataGenerator(str(team))
         Generator.getPlayersStats()
     elif int(info) == 2:
-        Generator = nbaDataGenerator(str(team))
+        Generator = NbaDataGenerator(str(team))
         Generator.getLastGame()
     else:
         print('Wrong number. Please enter 1 or 2 ONLY')
-
-
-
 
 # end = False
 # while not end:
