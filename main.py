@@ -5,7 +5,6 @@ import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import schedule
-import keyword
 
 
 # Class NbaDataGenerator to contain functions which gather data from internet
@@ -68,14 +67,28 @@ if int(onceOrContinuous) == 1:
         Generator = NbaDataGenerator(team)
         LastGameGenerator = Generator.getLastGame
         schedule.every(int(repeatTime)).seconds.do(LastGameGenerator)
+        print('Press "E" to end the program')
         while True:
             schedule.run_pending()
+            ############################
+            # Run 'sudo python main.py #
+            #     on MAC systems       #
+            #   as using keyboard will #
+            #   require administrator  #
+            #           access         #
+            ###########################3
+
+            if keyboard.is_pressed('E'):
+                break
     elif int(info) == 1:
         Generator = NbaDataGenerator(team)
         PlayerStatsGenerator = Generator.getPlayersStats
         schedule.every(10).seconds.do(PlayerStatsGenerator)
+        print('Press "E" to end the program')
         while True:
             schedule.run_pending()
+            if keyboard.is_pressed('E'):
+                break
     else:
         print('Wrong number. Please enter 1 or 2 ONLY')
 elif int(onceOrContinuous) == 2:
