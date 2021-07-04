@@ -1,13 +1,19 @@
+# Import all the required libraries (pd - dataframe, requests - get request, BeautifulSoup - Web Scraping,
+# schedule - continue program for desired time)
+import keyboard
 import pandas as pd
 import requests
 from bs4 import BeautifulSoup
 import schedule
+import keyword
 
 
+# Class NbaDataGenerator to contain functions which gather data from internet
 class NbaDataGenerator():
     def __init__(self, teamname):
         self.teamname = teamname
 
+    # Gets the stats of all current players of an inputted team
     def getPlayersStats(self):
         URL = 'https://www.basketball-reference.com/teams/' + str(self.teamname) + '/2021.html'
         page = requests.get(URL)
@@ -28,6 +34,7 @@ class NbaDataGenerator():
 
         print(pd.DataFrame(gsw_players).to_string())
 
+    # Gets the last game result of the team inputted
     def getLastGame(self):
         # score_file = open('scores', 'a')
         URL = 'https://www.basketball-reference.com/teams/' + str(self.teamname) + '/2021.html'
@@ -43,21 +50,24 @@ class NbaDataGenerator():
             #     'In their last game, ' + self.teamname + ' lost against ' + list_of_a[4][41:46] + ' ' + list_of_a[4][
             #                                                                                        9:16] + '\n')
             print('The score was ' + list_of_a[4][9:16])
+
         else:
             print('In their last game, ' + self.teamname + ' beat ' + list_of_a[4][41:46])
             # score_file.write('In their last game, ' + self.teamname + ' beat ' + list_of_a[4][41:46] + ' ' + list_of_a[4][9:16] + '\n')
             print('The score was ' + list_of_a[4][9:16])
 
 
+# These lines are just for easier functionality. Asks questions in the event log. These are optional and aren't needed
 onceOrContinuous = input('Would you like the program to run once or run continuously? Yes (1) or No (2) : ')
 team = input('Which team would you like details on? Please enter their 3 letter abbreviation: ')
 info = input('What info would you like: ALL THE PLAYERS AND THEIR STATS (1) or THE RESULT OF LAST GAME(2): ')
 
 if int(onceOrContinuous) == 1:
+    repeatTime = input('How many seconds would you like the program to repeat in? ')
     if int(info) == 2:
         Generator = NbaDataGenerator(team)
         LastGameGenerator = Generator.getLastGame
-        schedule.every(10).seconds.do(LastGameGenerator)
+        schedule.every(int(repeatTime)).seconds.do(LastGameGenerator)
         while True:
             schedule.run_pending()
     elif int(info) == 1:
@@ -77,26 +87,3 @@ elif int(onceOrContinuous) == 2:
         Generator.getLastGame()
     else:
         print('Wrong number. Please enter 1 or 2 ONLY')
-
-# end = False
-# while not end:
-#
-#
-#
-#     if int(info) == 1:
-#         print('')
-#         getPlayersStats(team)
-#     elif int(info) == 2:
-#         print("")
-#         getLastGame(team)
-#     elif int(info) == 3:
-#         print('')
-#         getPlayersStats(team)
-#         print('')
-#         getLastGame(team)
-#     else:
-#         print("Wrong number entered. Please enter 1, 2 or 3")
-#
-#     finish = input('Would you like to stop the program? Yes (1) or No (2): \n')
-#     if int(finish) == 1:
-#         end = True
