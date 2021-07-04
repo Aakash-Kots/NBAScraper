@@ -1,4 +1,4 @@
-<<<<<<< 
+
 NBA Scraper
 =======
 # NBAScraper
