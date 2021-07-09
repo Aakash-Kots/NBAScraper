@@ -1,17 +1,20 @@
 # Import all the required libraries (pd - dataframe, requests - get request, BeautifulSoup - Web Scraping,
 # schedule - continue program for desired time)
 import keyboard
+from numpy import mod
 import pandas as pd
+from pandas.core.algorithms import mode
 import requests
 from bs4 import BeautifulSoup
 import schedule
+from datetime import date
 
-df = pd.DataFrame(columns=['Team','Result',' Score', 'OPPTeam'])
+
+
 # Class NbaDataGenerator to contain functions which gather data from internet
 class NbaDataGenerator():
-    def __init__(self, teamname, df):
+    def __init__(self, teamname):
         self.teamname = teamname.upper()
-        self.df = df
 
     # Gets the stats of all current players of an inputted team
     def getPlayersStats(self):
@@ -36,14 +39,25 @@ class NbaDataGenerator():
 
     # Gets the last game result of the team inputted
     def getLastGame(self):
-        testCSV = open('test.csv', 'a')
+        
         URL = 'https://www.basketball-reference.com/teams/' + str(self.teamname) + '/2021.html'
         page = requests.get(URL)
+        csvFile = pd.read_csv('test2.csv')
         soup = BeautifulSoup(page.content, 'html.parser')
         meta = soup.find('div', attrs={'id': 'meta'})
+        file = open("test2.csv")
+        numline = len(file.readlines())
         list_of_a = []
+        list_of_p = []
         for last_game in meta.find_all('a'):
             list_of_a.append(last_game.text)
+        for ppg in meta.find_all('p'):
+            list_of_p.append(ppg)
+         
+        ppg = ""
+        
+        
+        
         if list_of_a[4][7] == 'L':
             # print('In their last game, ' + self.teamname + ' lost against ' + list_of_a[4][41:46])
             # score_file.write(
@@ -55,35 +69,49 @@ class NbaDataGenerator():
             for i in list_of_a[4]:
                 if not (i.isspace()):
                     final += i
-
-            print(final)
-
+            
+            # print(len(final))
             # print('The score was ' + list_of_a[4][9:16])
             finalscore = 0
             if len(final) == 14:
                 finalscore = final[1:8]
                 againstTeam = final[11:]
                 result = final[0]
+                ppgT = list_of_p[6].next.next.next.next
             elif len(final) == 13:
                 finalscore = final[1:8]
                 againstTeam = final[10:]
                 result = final[0]
+                ppgT = list_of_p[7].next.next.next.next
             elif len(final) == 12:
                 finalscore = final[1:7]
                 result = final[0]
+                ppgT = list_of_p[5].next.next.next.next
             elif len(final) == 11:
                 finalscore = final[1:6]
                 result = final[0]
-            Df = self.df.append({'Team': self.teamname, 'Result': result, 'Score': finalscore, 'OPPTeam': againstTeam},ignore_index=True)
-            Df = Df.drop(df.columns[2], axis=1)
-            print(Df)
-            testCSV.write(str(Df))
+                ppgT = list_of_p[3].next.next.next.next
+            
+            print(final)
+            for i in ppgT:
+                if not (i.isspace()):
+                    ppg += i
+            ppg = ppg[:5]
+        
+            finalList = ['empty']
+            if not(csvFile['TEAM'].isin([self.teamname]).any()):
+                Df = pd.DataFrame({'Team':[self.teamname],'Result':[result],'Score':[finalscore],'OPPTeam':[againstTeam], 'Date Checked':date.today().strftime("%d/%m/%Y"), 'PPG':ppg})
+                for i in range(numline):
+                    Df.index = [str(i+1)]
+                Df.to_csv('test2.csv',mode='a', header=False, index=True)
+                finalList.append(final)
+                
 
         else:
             print('In their last game, ' + self.teamname + ' beat ' + list_of_a[4][41:46])
             # score_file.write('In their last game, ' + self.teamname + ' beat ' + list_of_a[4][41:46] + ' ' + list_of_a[4][9:16] + '\n')
             print('The score was ' + list_of_a[4][9:16])
-
+        
 
 # These lines are just for easier functionality. Asks questions in the event log. These are optional and aren't needed
 onceOrContinuous = input('Would you like the program to run once or run continuously? Yes (1) or No (2) : ')
@@ -96,7 +124,7 @@ if int(onceOrContinuous) == 1:
         Generator = NbaDataGenerator(team)
         LastGameGenerator = Generator.getLastGame
         schedule.every(int(repeatTime)).seconds.do(LastGameGenerator)
-        print('Press "E" to end the program')
+        # print('Press "E" to end the program')
         while True:
             schedule.run_pending()
             ############################
@@ -107,25 +135,25 @@ if int(onceOrContinuous) == 1:
             #           access         #
             ###########################3
 
-            if keyboard.is_pressed('E'):
-                break
+            # if keyboard.is_pressed('E'):
+            #     break
     elif int(info) == 1:
-        Generator = NbaDataGenerator(team, df)
+        Generator = NbaDataGenerator(team)
         PlayerStatsGenerator = Generator.getPlayersStats
         schedule.every(10).seconds.do(PlayerStatsGenerator)
         print('Press "E" to end the program')
         while True:
             schedule.run_pending()
-            if keyboard.is_pressed('E'):
-                break
+            # if keyboard.is_pressed('E'):
+            #     break
     else:
         print('Wrong number. Please enter 1 or 2 ONLY')
 elif int(onceOrContinuous) == 2:
     if int(info) == 1:
-        Generator = NbaDataGenerator(str(team), df)
+        Generator = NbaDataGenerator(str(team))
         Generator.getPlayersStats()
     elif int(info) == 2:
-        Generator = NbaDataGenerator(str(team), df)
+        Generator = NbaDataGenerator(str(team))
         Generator.getLastGame()
     else:
         print('Wrong number. Please enter 1 or 2 ONLY')
